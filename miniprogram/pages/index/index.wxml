@@ -1,0 +1,21 @@
+<!--pages/index/index.wxml-->
+<view class="container">
+  <block wx:if="{{hasUserInfo}}" >
+
+  </block>
+      <view class="userinfo" style="width: 100%; height: 90%; display: flex; box-sizing: border-box; margin-top: 50%">
+        <block wx:if="{{!hasUserInfo}}">
+          <button wx:if="{{canIUseGetUserProfile}}" bindtap="getUserProfile" style="position: fixed; margin-top: auto"> 点击获取头像昵称 </button>
+          <button wx:else open-type="getUserInfo" bindgetuserinfo="getUserInfo"> 点击获取头像昵称 </button>
+        </block>
+        <block wx:else>
+          <image bindtap="bindViewTap" class="userinfo-avatar" src="{{userInfo.avatarUrl}}" mode="cover"></image>
+          <text class="userinfo-nickname">{{userInfo.nickName}}</text>
+        </block>
+      </view>
+
+      <block wx:if="{{hasUserInfo}}" >
+        <button type="primary" style="position: fixed; bottom: 10%; margin:  auto" bindtap="welcomeToLittleTime">欢迎进入小时光</button>
+      </block>
+</view>
+
