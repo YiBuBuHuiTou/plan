@@ -21,8 +21,11 @@ Page({
     })
     wx.getStorage({
       key: "plans",
-      success(res) {
-        this.data.plans = res.data
+      encrypt: false,
+      success:(res) => {
+        this.setData({
+          plans: res.data
+        })
         if( this.data.plans != [] ) {
           this.data.isPlanExist = true
         }

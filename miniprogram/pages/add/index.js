@@ -1,8 +1,9 @@
 /* 新增待办页面 */
-
+const app = getApp()
 Page({
   // 保存编辑中待办的信息
   data: {
+    nickName: '',
     title: '',
     desc: '',
     files: [],
@@ -13,10 +14,27 @@ Page({
     dateUnit: 0,
     hourEveryPeriod: '',
     planTotalTime: 0,
-    startDate: new Date().toLocaleDateString().replaceAll('/','-'),
-    endDate: new Date().toLocaleDateString().replaceAll('/','-'),
+    startDate: '',
+    endDate: '',
     planPeriodArray: ["以日为单位", "以周为单位", "以月为单位", "以季度为单位", "以年为单位"],
-    dateUnitArray: ["日","周","月","季度","年"]
+    dateUnitArray: ["日","周","月","季度","年"],
+    plans:[]
+  },
+  onLoad() {
+    this.setData({
+      startDate: app.formatDate(new Date().toLocaleDateString().replaceAll('/','-')),
+      endDate: app.formatDate(new Date().toLocaleDateString().replaceAll('/','-')),
+    })
+    wx.getStorage({
+      key: "userInfo",
+      encrypt: true,
+      success: (res) => {
+        this.setData({
+          nickName: res.data.nickName
+        })
+        console.log("nickName = " + this.data.nickName)
+      }
+    })
   },
   updateTotleTime(e) {
     var count = 0
@@ -37,7 +55,7 @@ Page({
           count = 1
     }
     this.setData({
-      planTotalTime: this.data.hourEveryPeriod* (Math.floor(((Date.parse(this.data.endDate) - Date.parse(this.data.startDate))/(24 * 3600*1000)) / count) + 1 )
+      planTotalTime: this.data.hourEveryPeriod* (((Date.parse(this.data.endDate) - Date.parse(this.data.startDate))/(24 * 3600*1000) / count) + 1 )
     })
   },
   onHourEveryPeriodInput(e) {
@@ -83,6 +101,7 @@ Page({
     })
   },
 
+ 
   onDescInput(e) {
     this.setData({
       desc: e.detail.value
@@ -130,11 +149,11 @@ Page({
   },
 
   // 保存待办
-  async saveTodo() {
+  async savePlan() {
     // 对输入框内容进行校验
     if (this.data.title === '') {
       wx.showToast({
-        title: '事项标题未填写',
+        title: '标题未填写',
         icon: 'error',
         duration: 2000
       })
@@ -142,7 +161,7 @@ Page({
     }
     if (this.data.title.length > 10) {
       wx.showToast({
-        title: '事项标题过长',
+        title: '标题过长',
         icon: 'error',
         duration: 2000
       })
@@ -150,38 +169,93 @@ Page({
     }
     if (this.data.desc.length > 100) {
       wx.showToast({
-        title: '事项描述过长',
+        title: '描述过长',
         icon: 'error',
         duration: 2000
       })
       return
     }
-    const db = await getApp().database()
+    // const db = await getApp().database()
     // 在数据库中新建待办事项，并填入已编辑对信息
-    db.collection(getApp().globalData.collection).add({
-      data: {
-        title: this.data.title,       // 待办标题
-        desc: this.data.desc,         // 待办描述
-        files: this.data.files,       // 待办附件列表
-        freq: Number(this.data.freq), // 待办完成情况（提醒频率）
-        star: false
+    // db.collection(getApp().globalData.collection).add({
+    //   data: {
+    //     title: this.data.title,       // 待办标题
+    //     desc: this.data.desc,         // 待办描述
+    //     files: this.data.files,       // 待办附件列表
+    //     freq: Number(this.data.freq), // 待办完成情况（提醒频率）
+    //     star: false
+    //   }
+    // }).then(() => {
+    //   wx.navigateBack({
+    //     delta: 0,
+    //   })
+    // })
+    let currentPlan = {}
+    currentPlan["title"] = this.data.title
+    currentPlan["nickName"] = this.data.nickName
+    currentPlan["planPeriod"] = this.data.planPeriod
+    currentPlan["dateUnit"] = this.data.dateUnit
+    currentPlan["hourEveryPeriod"] = this.data.hourEveryPeriod
+    currentPlan["planTotalTime"] = this.data.planTotalTime
+    currentPlan["startDate"] = this.data.startDate
+    currentPlan["endDate"] = this.data.endDate
+
+  
+    await wx.getStorage({
+      key: this.data.nickName + "plans",
+      success: (res) => {
+        // if (res.data != "undefined" || res.data != [] ) {
+        //   this.setData({
+        //     plans: JSON.parse(res.data)
+        //   })
+        // } else {
+        // }
+        console.log("已保存的plan"+res.data)
+
+        if(typeof res.data != "undefined") {
+          this.data.plans = res.data
+        } else {
+          this.data.plans = []
+        }
       }
-    }).then(() => {
-      wx.navigateBack({
-        delta: 0,
-      })
+    })
+    
+    console.log("已经存在的plan" + JSON.stringify(this.data.plans))
+    this.data.plans.push(currentPlan)
+    console.log("更新后的plan" + JSON.stringify(this.data.plans))
+
+    await wx.setStorage({
+      key: this.data.nickName + "plans",
+      data: this.data.plans, 
+      success() {
+        // 测试用代码
+        wx.getStorage({
+          key: "plans",
+          success(res) {
+            console.log("更新plan" + JSON.stringify(res))
+          }
+        })
+      }
+    })
+    wx.navigateTo({
+      url: '../list/index',
     })
   },
 
   // 重置所有表单项
-  resetTodo() {
+  resetPlan() {
     this.setData({
       title: '',
       desc: '',
       files: [],
       fileName: '',
-      freqOptions: ['未完成', '已完成'],
-      freq: 0
+      freq: 0,
+      planPeriod: 0,
+      dateUnit: 0,
+      hourEveryPeriod: '',
+      planTotalTime: 0,
+      startDate: app.formatDate(new Date().toLocaleDateString().replaceAll('/','-')),
+      endDate: app.formatDate(new Date().toLocaleDateString().replaceAll('/','-')),
     })
   },
 

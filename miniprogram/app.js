@@ -9,8 +9,28 @@ App({
       fileLimit: 2
     }
   },
-
+  
   flag: false,
+ /**
+   * 
+   * @param {填充0} tmpDate 
+   */
+  formatDate( tmpDate ) {
+    var res = ''
+    var tmp = tmpDate.toString().split("-")
+    res = tmp[0]
+    if ( tmp[1].length < 2 ) {
+      res += "-0" + tmp[1] 
+    } else {
+      res += tmp[1]
+    }
+    if ( tmp[2].length < 2 ) {
+      res += "-0" + tmp[2] 
+    } else {
+      res += '-' + tmp[2]
+    }
+    return res
+  },
   /**
    * 初始化云开发环境（支持环境共享和正常两种模式）
    */

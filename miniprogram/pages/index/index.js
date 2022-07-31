@@ -28,6 +28,14 @@ Page({
           encrypt: true,
           success() {
             console.log("将用户信息加密存储在缓存中")
+            wx.getStorage({
+              key: "userInfo",
+              encrypt: true,
+              success(res) {
+                console.log(res.data)
+              }
+
+            })
           }
         })
       }})
