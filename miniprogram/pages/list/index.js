@@ -3,6 +3,7 @@
 Page({
   // 存储请求结果
   data: {
+    nickName: '',
     plans: [], // 用户的所有待办事项
     pending: [], // 未完成待办事项
     finished: [], // 已完成待办事项
@@ -10,27 +11,37 @@ Page({
     userInfo:{}
   },
 
-  onLoad() {
-    wx.getStorage({
+  async onLoad() {
+    await wx.getStorage({
       key: "userInfo",
       encrypt: true,
-      success(res) {
-       // userInfo = res.data
-        console.log("取得用户信息 " +  res.data)
+      success: (res) => {
+        this.setData({
+          userInfo: res.data ,
+          nickName: res.data.nickName
+        })
+        console.log("取得用户信息 " +  this.data.nickName)
       }
     })
-    wx.getStorage({
-      key: "plans",
-      encrypt: false,
+    console.log("用户nickeName" +  this.data.nickName)
+
+    await wx.getStorage({
+      key: this.data.nickName + "plans",
       success:(res) => {
+        console.log("加载的数据 + " + res.data)
         this.setData({
           plans: res.data
         })
-        if( this.data.plans != [] ) {
+        if( this.data.plans != [] && this.data.plans.length > 0) {
           this.data.isPlanExist = true
         }
+      },
+      fail:() => {
+        console.log("加载失败" + this.data.nickName)
       }
     })
+    console.log("是否已存在plan" +  this.data.isPlanExist)
+    console.log("是否已存在plan" +  this.data.plans)
   },
   onShow() {
 
