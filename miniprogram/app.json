@@ -18,5 +18,5 @@
   },
   "sitemapLocation": "sitemap.json",
   "style": "v2",
-  "debug": true
+  "debug": false
 }

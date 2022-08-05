@@ -16,19 +16,18 @@
     <mp-badge content="{{pending.length}}" style="margin-left: 5px;" />
   </view>
   <view class="form-group" wx:if="{{pending.length > 0}}">
-    <view class="form-cell" wx:for="{{pending}}" wx:key="index">
-      <mp-slideview buttons="{{slideButtons}}" data-index='{{index}}' bindbuttontap="slideButtonTap">
-        <view class="slide" data-index="{{index}}" bindtap="toDetailPage">
-          <image class="checkbox" data-index='{{index}}' src="../../images/list/pending.png" catchtap="finishTodo"/>
-          <view class="todo-info">
-            <view class="todo-info_title">{{util.filterStr(item.title, 10)}}</view>
-            <view class="todo-info_desc">{{util.filterStr(item.desc, 10)}}</view>
-          </view>
-          <image wx:if="{{item.star}}" class="star" src="../../images/file/star.png" />
-          <image wx:if="{{item.files.length > 0}}" data-index='{{index}}' class="file" src="../../images/file/file.png" catchtap="toFileList" />
+    <view class="form-cell" wx:for="{{pending}}" wx:key="title">
+        <view class="slide">
+          <text style="position:relative;">{{item.title}}</text>
+          <text style="position:relative;">完成度：{{item.percent}}</text>
+
         </view>
-      </mp-slideview>
-    </view>
+        <view class="todo-info">
+          <text style="position:relative;">开始时间：{{item.startDate}}</text>
+          <text style="position:relative;">结束时间：{{item.endDate}}</text>
+          
+        </view>
+      </view>
   </view>
   <view class="form-group_label">
     已完成

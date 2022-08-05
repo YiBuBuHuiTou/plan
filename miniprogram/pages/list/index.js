@@ -17,34 +17,60 @@ Page({
       encrypt: true,
       success: (res) => {
         this.setData({
-          userInfo: res.data ,
           nickName: res.data.nickName
         })
-        console.log("取得用户信息 " +  this.data.nickName)
-      }
-    })
-    console.log("用户nickeName" +  this.data.nickName)
+        console.log("nickName = " + this.data.nickName)
+        wx.getStorage({
+          key: this.data.nickName + "plans",
+          success:(res) => {
+            console.log("加载的数据 + " + res.data)
+            this.setData({
+              plans: res.data
+            })
+            if( this.data.plans != [] && this.data.plans.length > 0) {
+              this.data.isPlanExist = true
+            }
+            console.log("用户nickeName" +  this.data.nickName)
+            console.log("是否已存在plan" +  this.data.isPlanExist)
+            console.log("是否已存在plan" +  JSON.stringify(this.data.plans))
+            this.onSortPlans(this.data.plans)
 
-    await wx.getStorage({
-      key: this.data.nickName + "plans",
-      success:(res) => {
-        console.log("加载的数据 + " + res.data)
-        this.setData({
-          plans: res.data
+          },
+          fail:() => {
+            console.log("加载失败" + this.data.nickName)
+          }
         })
-        if( this.data.plans != [] && this.data.plans.length > 0) {
-          this.data.isPlanExist = true
-        }
-      },
-      fail:() => {
-        console.log("加载失败" + this.data.nickName)
       }
     })
-    console.log("是否已存在plan" +  this.data.isPlanExist)
-    console.log("是否已存在plan" +  this.data.plans)
   },
-  onShow() {
+  onSortPlans(unSortedPlans) {
+    console.log("待排序plan" +  JSON.stringify(unSortedPlans))
+    let pendPlan = []
+    let finishedPlan = []
+    if ( typeof unSortedPlans == "undefined") {
+      return
+    }
+    for (var tempPlan of  unSortedPlans) {
+      console.log("tempPlan:" + JSON.stringify(tempPlan))
+      console.log("tempPlan.title:" + tempPlan.title)
 
+      if ( new Date(tempPlan.endDate) < new Date()) {
+        // 已完成
+        pendPlan.push(tempPlan)
+      } else{
+        // 未完成
+        finishedPlan.push(tempPlan)
+      }
+      this.setData({
+        pending: pendPlan,
+        finished: finishedPlan
+      })
+    }
+    console.log("pending:" + JSON.stringify(this.data.pending))
+    console.log("finished:" + JSON.stringify(this.data.finished))
+  }, 
+  onShow() {
+    this.onLoad()
     /**
     // 通过云函数调用获取用户 _openId
     getApp().getOpenId().then(async openid => {
